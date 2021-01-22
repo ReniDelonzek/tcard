@@ -21,7 +21,13 @@ class TCardController {
 
   forward({SwipDirection direction = SwipDirection.Right}) {
     final SwipInfo swipInfo = SwipInfo(_state._frontCardIndex, direction);
-    _state._swipInfoList.add(swipInfo);
+    int index = _state._swipInfoList
+        .indexWhere((element) => element.cardIndex == _state._frontCardIndex);
+    if (index > -1) {
+      _state._swipInfoList[index] = swipInfo;
+    } else {
+      _state._swipInfoList.add(swipInfo);
+    }
     _state._runChangeOrderAnimation();
   }
 
@@ -118,19 +124,23 @@ class _TCardState extends State<TCard> with TickerProviderStateMixin {
     if (reverse) {
       return Align(
         alignment: CardReverseAnimations.frontCardShowAnimation(
-          _cardReverseController,
-          CardAlignments.front,
-          _swipInfoList[_frontCardIndex],
-        ).value,
+            _cardReverseController,
+            CardAlignments.front,
+            _swipInfoList.firstWhere(
+                (element) => element.cardIndex == _frontCardIndex,
+                orElse: () => null)).value,
         child: rotate,
       );
     } else if (forward) {
       return Align(
         alignment: CardAnimations.frontCardDisappearAnimation(
-          _cardChangeController,
-          _frontCardAlignment,
-          _swipInfoList[_frontCardIndex],
-        ).value,
+            _cardChangeController,
+            _frontCardAlignment,
+            _swipInfoList.firstWhere(
+                (element) => element.cardIndex == _frontCardIndex,
+                orElse: () => null)
+            //_swipInfoList[_frontCardIndex],
+            ).value,
         child: rotate,
       );
     } else {
@@ -234,7 +244,8 @@ class _TCardState extends State<TCard> with TickerProviderStateMixin {
   // 判断是否在进行动画
   bool _isAnimating() {
     return _cardChangeController.status == AnimationStatus.forward ||
-        _cardReverseController.status == AnimationStatus.forward;
+        _cardReverseController.isAnimating;
+    //_cardReverseController.status == AnimationStatus.forward;
   }
 
   // 运行卡片回弹动画
@@ -359,10 +370,14 @@ class _TCardState extends State<TCard> with TickerProviderStateMixin {
     // 判断是否运行向前的动画，否则回弹
     if (isSwipLeft || isSwipRight) {
       _runChangeOrderAnimation();
-      if (isSwipLeft) {
-        _swipInfoList.add(SwipInfo(_frontCardIndex, SwipDirection.Left));
+      int index = _swipInfoList
+          .indexWhere((element) => element.cardIndex == _frontCardIndex);
+      final info = SwipInfo(_frontCardIndex,
+          isSwipLeft ? SwipDirection.Left : SwipDirection.Right);
+      if (index > -1) {
+        _swipInfoList[index] = info;
       } else {
-        _swipInfoList.add(SwipInfo(_frontCardIndex, SwipDirection.Right));
+        _swipInfoList.add(info);
       }
     } else {
       _runReboundAnimation(details.velocity.pixelsPerSecond, size);

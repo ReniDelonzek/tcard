@@ -121,7 +121,7 @@ class CardReverseAnimations {
   ) {
     return AlignmentTween(
       begin: Alignment(
-        info.direction == SwipDirection.Left
+        info?.direction == SwipDirection.Left
             ? endAlignment.x - 30.0
             : endAlignment.x + 30.0,
         0.0,
