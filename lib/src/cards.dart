@@ -20,7 +20,8 @@ class TCardController {
   int get index => _state?._frontCardIndex ?? 0;
 
   forward({SwipDirection direction = SwipDirection.Right}) {
-    final SwipInfo swipInfo = SwipInfo(_state._frontCardIndex, direction);
+    final SwipInfo swipInfo =
+        SwipInfo(_state._frontCardIndex, direction, forward: true);
     int index = _state._swipInfoList
         .indexWhere((element) => element.cardIndex == _state._frontCardIndex);
     if (index > -1) {
